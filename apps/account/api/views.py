@@ -5,6 +5,9 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from .serializers import *
 from django.utils.crypto import get_random_string
+from rest_framework_jwt.serializers import jwt_payload_handler, \
+    jwt_encode_handler
+from django.contrib.auth import user_logged_in
 from rest_framework.generics import get_object_or_404
 from rest_framework.pagination import PageNumberPagination
 
@@ -17,8 +20,14 @@ class LoginAPIView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data,
                                          context={"request": request})
         serializer.is_valid(raise_exception=True)
-        token, created = Token.objects.get_or_create(user=serializer.get_user())
-        return Response({'token': token.key}, status=status.HTTP_200_OK)
+        user_logged_in.send(
+            sender=serializer.validated_data.get("user").__class__,
+            request=request,
+            user=serializer.validated_data.get("user"))
+        response_data = {"token": serializer.validated_data.get('token')}
+        return Response(response_data, status=status.HTTP_200_OK)
+        # token,created=Token.objects.get_or_create(user=serializer.get_user())
+        # return Response({'token': token.key}, status=status.HTTP_200_OK)
 
 
 class CreateUserAPIView(generics.CreateAPIView):
@@ -30,8 +39,10 @@ class CreateUserAPIView(generics.CreateAPIView):
                                          context={"request": request})
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({'token': token.key}, status=status.HTTP_200_OK)
+        payload = jwt_payload_handler(user)
+        return Response({'token': jwt_encode_handler(payload)})
+        # token, created = Token.objects.get_or_create(user=user)
+        # return Response({'token': token.key}, status=status.HTTP_200_OK)
 
 
 class RetrieveUserAPIView(generics.RetrieveAPIView):

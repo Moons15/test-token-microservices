@@ -1,4 +1,4 @@
-import datetime
+from datetime import timedelta
 import os
 
 BASE_DIR = os.path.dirname(
@@ -66,7 +66,12 @@ TEMPLATES = [
         },
     },
 ]
-
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=22),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=4),
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+}
 WSGI_APPLICATION = 'corebackend.wsgi.application'
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -92,7 +97,8 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',

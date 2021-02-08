@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from apps.account.models import User
+from rest_framework_jwt.serializers import jwt_payload_handler, \
+    jwt_encode_handler
 from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail.message import EmailMessage
@@ -39,7 +41,12 @@ class LoginSerializer(serializers.Serializer):
         if not self.user_cache:
             raise serializers.ValidationError("Invalid login")
         else:
-            return attrs
+            payload = jwt_payload_handler(self.user_cache)
+
+            return {
+                'token': jwt_encode_handler(payload),
+                'user': self.user_cache
+            }
 
     def get_user(self):
         return self.user_cache

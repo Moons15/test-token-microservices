@@ -14,7 +14,9 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.urls import path
 from django.contrib import admin
+from rest_framework_simplejwt import views as jwt_views
 from django.views.static import serve
 from corebackend.settings import base
 from django.conf.urls.static import static
@@ -24,10 +26,10 @@ urlpatterns = [
                   url(r'^admin/', admin.site.urls),
                   url(r'^api/v1.0/user/',
                       include('apps.account.api.urls', namespace='account')),
-                  # url(r'^api/discount/',
-                  #     include('account.discounts.urls', namespace='discount',)),
-                  # url(r'^api/albums/',
-                  #     include('account.albums.urls', namespace='albums',)),
+                  path('token/', jwt_views.TokenObtainPairView.as_view(),
+                       name='token_obtain_pair'),
+                  path('token/refresh/', jwt_views.TokenRefreshView.as_view(),
+                       name='token_refresh'),
                   # Docs URL
                   url(r'^docs/', include('rest_framework_docs.urls')),
               ] + static(settings.STATIC_URL,
