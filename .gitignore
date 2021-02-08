@@ -1,0 +1,7 @@
+.idea/*
+__pycache__
+.idea
+.media/*
+.pyc
+media
+corebackend/settings/local.py
